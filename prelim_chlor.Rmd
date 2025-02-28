@@ -1,0 +1,23 @@
+---
+title: "Prelim chlorophyll"
+author: "Bianca Rodas"
+date: "2025-02-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("tidyverse")
+library("janitor")
+```
+
+
+## Data Cleaning
+
+```{r}
+raw_chlorophyll <- read_csv("erdMWchla8day_LonPM180_757e_2c79_de26.csv")
+```
+
