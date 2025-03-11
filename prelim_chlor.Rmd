@@ -10,14 +10,163 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library("tidyverse")
-library("janitor")
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(viridis)
+library(maps)
 ```
 
 
 ## Data Cleaning
 
 ```{r}
-raw_chlorophyll <- read_csv("erdMWchla8day_LonPM180_757e_2c79_de26.csv")
+raw_chlorophyll_0124 <- read_csv("data/01-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_0324 <- read_csv("data/03-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_0524 <- read_csv("data/05-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_0724 <- read_csv("data/07-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_0924 <- read_csv("data/09-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_1124 <- read_csv("data/11-2024.csv", 
+                            na =c("NaN"))
+
+raw_chlorophyll_0125 <- read_csv("data/erdMWchla8day_LonPM180_757e_2c79_de26.csv", 
+                            na =c("NaN")) #allows R to read in NA values
 ```
+
+```{r}
+clean_chlor_0124 <- raw_chlorophyll_0124[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_0324 <- raw_chlorophyll_0324[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_0524 <- raw_chlorophyll_0524[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_0724 <- raw_chlorophyll_0724[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_0924 <- raw_chlorophyll_0924[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_1124 <- raw_chlorophyll_1124[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll))
+
+clean_chlor_0125 <- raw_chlorophyll_0125[-1, ] |>
+  mutate(date=as_datetime(time),
+         altitude=as.numeric(altitude),
+         latitude=as.numeric(latitude),
+         longitude=as.numeric(longitude),
+         chlorophyll=as.numeric(chlorophyll)) 
+
+chlor_2024 <- rbind(clean_chlor_0124, clean_chlor_0324, clean_chlor_0524, clean_chlor_0724, clean_chlor_0924, clean_chlor_1124, clean_chlor_0125)
+
+file_path <- "clean_data/chlor_2024.csv"
+
+# Write the data frame to a CSV file
+#write.csv(chlor_2024, file = file_path, row.names = FALSE)
+```
+
+
+## Chlorophyll for year 2024
+
+```{r}
+chlor_2024 <- read_csv("clean_data/chlor_2024.csv")
+```
+
+
+
+```{r}
+#subset <- chlor_2024 |> 
+  
+chlor_2024$month <- as.factor(chlor_2024$date)
+
+
+ggplot(chlor_2024, aes(x = month, y = log(chlorophyll+1))) +
+  geom_boxplot(color = "black") +
+  geom_jitter(aes(color=month),
+              alpha=0.1,
+              show.legend=F,
+              width=0.2)+
+  labs(title = "Time Series of Chlorophyll in Monterey Bay during 2024", x = "Date", y = "Log (Chlorophyll mg m-3)") +
+  theme_bw()+
+  scale_color_viridis(discrete=T, option="plasma")
+
+ggsave("chlorophyll_boxplot.png", width = 8, height = 6, units = "in")
+```
+
+
+```{r}
+ggplot(chlor_2024, aes(x = month, y = chlorophyll)) +
+  geom_jitter(aes(color=month))+
+  geom_smooth(method = "gam", color = "black") +
+  labs(title = "Time Series of chlorophyll", x = "Date", y = "chlorophyll") +
+  theme_minimal()
+```
+
+
+```{r}
+ggplot(chlor_2024, aes(x = longitude, y = latitude)) +
+  geom_polygon(fill = "lightgray", color = "black") +
+  geom_point(aes(x = longitude, y = latitude, 
+                              color = chlorophyll),
+             size=2.8)+
+  labs(title="Chlorophyll Concentration in Monterey Bay During 2024",
+       x="",
+       y="")+
+  scale_color_viridis(option="plasma")+
+  facet_wrap(~month,
+             scales = "free_x", ncol = 4)+
+  theme_bw()+
+  theme(axis.text.x = element_text(size = 7),
+        panel.spacing.x = unit(8, "mm"),
+        legend.position = c(1, 0),
+        legend.justification = c(1, 0))
+  
+
+ggsave("chlorophyll_maps.png", width = 8, height = 5, units = "in")
+```
+
+
+
+
+
+
 
